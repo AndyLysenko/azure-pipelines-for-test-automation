@@ -1,16 +1,16 @@
 # About
 
-[<img align="right" width="200px" src="https://planview-media.s3.us-west-2.amazonaws.com/wp-content/uploads/2022/10/azure_devops_-_new_logo.png" />](https://azure.microsoft.com/en-us/products/devops/pipelines)
+[<img align="right" width="200px" src="https://planview-media.s3.us-west-2.amazonaws.com/wp-content/uploads/2022/10/azure_devops_-_new_logo.png" target="_blank" />](https://azure.microsoft.com/en-us/products/devops/pipelines)
 
 This repository contains real life examples of Azure DevOps pipelines for running automated tests.
 
 # Contents
 
-`templates` - templates of jobs and reusable steps.
-`variables.yml` - template containing variables and constants.
-`on-demand.yml` - pipeline definition for manual test run. Contains all possible filters.
-`all-qa.yml` - pipeline definition to run all test on qa environment. Triggered by push to main.
-`scheduled` - pipeline definitions for scheduled test runs.
+- `templates` - templates of jobs and reusable steps.
+- `variables.yml` - template containing variables and constants.
+- `on-demand.yml` - pipeline definition for manual test run. Contains all possible filters.
+- `all-qa.yml` - pipeline definition to run all test on qa environment. Triggered by push to main.
+- `scheduled` - pipeline definitions for scheduled test runs.
 
 # What it does
 All workflows more or less go through the same flow:
