@@ -1,0 +1,28 @@
+parameters:
+  - name: serviceOwnerEmail
+    type: string
+
+steps:
+  - bash: |
+      cd /home/vsts/work/_tasks/EmailReport_36fd41b1-8024-4ce9-a5a0-53c3e54ed105/1.1.8
+      cp ./index.js ./Index.js
+      sed -i -e "s~\\\\\\\\~/~" ./htmlreport/HTMLReportCreator.js
+      sed -i -e "s~\\\\\\\\~/~" ./model/helpers/LinkHelper.js
+    displayName: Fix email report lib
+    condition: succeededOrFailed() 
+  - task: EmailReport@1
+    displayName: Send email report  
+    inputs:
+      sendMailConditionConfig: 'On Failure'
+      subject: '[{environmentStatus}] {passPercentage} tests passed in $(configuration) stage for $(Build.BuildNumber)'
+      includeInToSectionStr: '1'
+      toAddress: 'user3@org.com;${{ parameters.serviceOwnerEmail }}'
+      ccAddress: ''
+      defaultDomain: 'org.com'
+      groupTestResultsBy: 'run'
+      includeCommits: false
+      maxTestFailuresToShow: '10'
+      includeOthersInTotal: false
+      usePreviousEnvironment: false
+      smtpConnectionEndpoint: 'SMTP_Connection_For_Automation_Notification'
+    condition: succeededOrFailed()   

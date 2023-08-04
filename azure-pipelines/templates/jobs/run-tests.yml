@@ -1,0 +1,78 @@
+parameters:
+  - name: environment
+    type: string
+  - name: testProject
+    type: string
+    default: '**/Organization.ApiTests.csproj'
+  - name: testFilter
+    type: string
+  - name: testRunType
+    type: string
+    default: self
+    values:
+      - self
+      - service
+  - name: serviceOwnerEmail
+    type: string
+    default: ''
+  - name: emailSubject
+    type: string
+
+jobs:
+  - job: RunTests
+    timeoutInMinutes: 120
+    displayName: Run API tests in ${{parameters.environment}}
+    steps:
+    - ${{ if eq(parameters.testRunType, 'self') }}:
+      - checkout: self
+    - ${{ if eq(parameters.testRunType, 'service') }}:
+      - checkout: git://owner/repo@master
+    - task: UseDotNet@2
+      displayName: Use .Net $(dotnetVersion)
+      inputs:
+        version: $(dotnetVersion)
+        installationPath: $(Agent.ToolsDirectory)/dotnet
+    - task: DotNetCoreCLI@2
+      displayName: 'Dotnet restore'
+      inputs:
+        command: restore
+        projects: '**/*.csproj'
+        feedsToUse: 'select'
+        vstsFeed: '$(vstsFeed)'
+        arguments: '-c "${{ parameters.environment }}"'
+    - task: DotNetCoreCLI@2
+      retryCountOnTaskFailure: 3
+      displayName: 'Run tests'
+      inputs:
+        command: 'test'
+        projects: ${{parameters.testProject}}
+        publishTestResults: true
+        testRunTitle: 'Run $(runTitle) API tests on ${{ parameters.environment }}'
+        arguments: '--no-restore --filter "${{ parameters.testFilter }}" -c "${{ parameters.environment }}"'
+      continueOnError: false
+      env:
+        AppSettings__ConnectionDetails__Secret1: $(ado-keyvault-secret1)
+        AppSettings__ConnectionDetails__Secret1: $(ado-keyvault-secret2)
+        AppSettings__ConnectionDetails__Secret1: $(ado-keyvault-secret3)
+    - task: CopyFiles@2
+      displayName: 'Copy test report'
+      inputs:
+        contents: '**/*_Report.html'
+        targetFolder: '$(Build.ArtifactStagingDirectory)'
+        overWrite: true
+        flattenFolders: true
+      condition: succeededOrFailed()
+    - task: PublishBuildArtifacts@1
+      displayName: 'Publish report as artifact'
+      inputs:
+        pathToPublish: '$(Build.ArtifactStagingDirectory)'
+        artifactName: 'test_run_report'
+      condition: succeededOrFailed()
+    - ${{ if eq(parameters.testRunType, 'self') }}:
+      - template: ../steps/send_email_report_self.yml
+        parameters:
+          emailSubject: ${{ parameters.emailSubject }}
+    - ${{ if eq(parameters.testRunType, 'service') }}:
+      - template: ../steps/send_email_report_service.yml
+        parameters:
+          serviceOwnerEmail: ${{ parameters.serviceOwnerEmail }}

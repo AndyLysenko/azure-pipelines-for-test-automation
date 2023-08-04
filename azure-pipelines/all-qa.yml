@@ -1,0 +1,57 @@
+name: $(Build.DefinitionName)_$(Build.SourceBranchName)_$(date:yyyyMMdd)$(rev:.r)
+
+trigger:
+  branches:
+    include:
+    - main
+
+pool:
+  vmImage: "Ubuntu-latest"
+
+parameters:
+  - name: environment
+    displayName: Run environment
+    type: string
+    default: qa
+    values:
+      - qa
+  - name: hwPlatform
+    displayName: Hardware platform
+    type: string
+    default: 'All'
+    values:
+      - All
+  - name: testCycle
+    displayName: Test cycle
+    type: string
+    default: 'All'
+    values:
+      - All
+  - name: testName
+    displayName: Test filter
+    type: string
+    default: '.'
+  - name: reportLogLevel
+    displayName: 'Html report log level'
+    type: string
+    default: 'Information'
+    values:
+      - Validation
+      - Information
+      - Verbose
+
+variables:
+  - template: ./templates/variables.yml
+    parameters: 
+      environment: ${{ parameters.environment }}
+      hwPlatform: ${{ parameters.hwPlatform }}
+      testCycle: ${{ parameters.testCycle }}
+      testName: ${{ parameters.testName }}
+      reportLogLevel: ${{ parameters.reportLogLevel }}
+
+jobs:
+  - template: ./templates/jobs/run-tests.yml
+    parameters:
+      environment: ${{ parameters.environment }}
+      testFilter: $(testCycleFilter) & $(hwPlatformFilter) & $(testNameFilter)
+      emailSubject: '[$(runTitle)] [{environmentStatus}] {passPercentage} tests passed in ${{ parameters.environment }} environment'

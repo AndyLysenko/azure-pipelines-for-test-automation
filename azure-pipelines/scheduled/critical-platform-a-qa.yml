@@ -1,0 +1,62 @@
+name: $(runTitle)_${{ parameters.environment }}_$(Build.SourceBranchName)_$(date:yyyyMMdd)$(rev:.r)
+
+trigger: none
+
+schedules:
+- cron: '0 0 * * 1-5'
+  displayName: 'Nightly run - critical suite'
+  branches:
+    include: 
+    - main  
+  always: true
+
+pool:
+  vmImage: "Ubuntu-latest"
+
+parameters:
+  - name: environment
+    displayName: Run environment
+    type: string
+    default: qa
+    values:
+      - qa
+  - name: hwPlatform
+    displayName: Hardware platform
+    type: string
+    default: 'critical-platform-a-qa'
+    values:
+      - platform_a
+  - name: priority
+    displayName: Priority
+    type: string
+    default: 'Critical'
+    values:
+      - Critical
+  - name: testId
+    displayName: Test Id
+    type: string
+    default: '.'
+  - name: reportLogLevel
+    displayName: 'Html report log level'
+    type: string
+    default: 'Information'
+    values:
+      - Validation
+      - Information
+      - Verbose
+
+variables:
+  - template: ../templates/variables.yml
+    parameters: 
+      environment: ${{ parameters.environment }}
+      hwPlatform: ${{ parameters.hwPlatform }}
+      priority: ${{ parameters.priority }}
+      testId: ${{ parameters.testId }}
+      reportLogLevel: ${{ parameters.reportLogLevel }}
+
+jobs:
+  - template: ../templates/jobs/run-tests.yml
+    parameters:
+      environment: ${{ parameters.environment }}
+      testFilter: $(priorityFilter) & $(hwPlatformFilter) & $(testIdFilter)
+      emailSubject: '[$(runTitle)] [{environmentStatus}] {passPercentage} tests passed in ${{ parameters.environment }} environment'

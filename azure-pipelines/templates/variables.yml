@@ -1,0 +1,48 @@
+parameters:
+  - name: environment
+    type: string
+  - name: priority
+    type: string
+  - name: hwPlatform
+    type: string
+  - name: testId
+    type: string
+  - name: reportLogLevel
+    type: string
+
+variables:
+  - ${{ if eq(parameters.environment, 'qa') }}:
+    - group: 'aks-qa'
+  - ${{ if eq(parameters.environment, 'dev') }}:
+    - group: 'aks-dev'
+  - ${{ if eq(parameters.environment, 'staging') }}:
+    - group: 'aks-staging'
+
+  - name: vstsFeed
+    value: '77b1913b-1cbb-48e2-b7a9-bc486f067c2d/588c00a2-79d9-462b-96bd-4e13af760a47'
+  - name: dotnetVersion
+    value: '6.0.x'
+
+  - name: testIdFilter
+    ${{ if eq(parameters.testId, '.') }}:
+      value: '.'
+    ${{ if ne(parameters.testId, '.') }}:
+      value: TestId~${{ parameters.testId }}
+
+  - name: priorityFilter
+    ${{ if eq(parameters.priority, 'All') }}:
+      value: '.'
+    ${{ if ne(parameters.priority, 'All') }}:
+      value: 'Priority=${{parameters.priority}}'
+
+  - name: hwPlatformFilter
+    ${{ if eq(parameters.hwPlatform, 'All') }}:
+      value: '.'
+    ${{ if ne(parameters.hwPlatform, 'All') }}:
+      value: 'Platform=${{ parameters.hwPlatform }}'
+
+  - name: runTitle
+    value: ${{ parameters.hwPlatform }}_${{ parameters.priority }}
+
+  - name: 'ReportSettings__LogLevel'
+    value: ${{ parameters.reportLogLevel }}
