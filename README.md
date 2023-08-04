@@ -1,6 +1,6 @@
 # About
 
-[<img align="right" width="200px" src="https://planview-media.s3.us-west-2.amazonaws.com/wp-content/uploads/2022/10/azure_devops_-_new_logo.png" target="_blank" />](https://azure.microsoft.com/en-us/products/devops/pipelines)
+[<img align="right" width="200px" src="https://planview-media.s3.us-west-2.amazonaws.com/wp-content/uploads/2022/10/azure_devops_-_new_logo.png"" />](https://azure.microsoft.com/en-us/products/devops/pipelines){:target="_blank"}
 
 This repository contains real life examples of Azure DevOps pipelines for running automated tests.
 
